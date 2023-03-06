@@ -1,3 +1,4 @@
+const { request } = require("express");
 const express = require("express");
 const { v4: uuidv4 } = require("uuid");
 const router = express.Router();
@@ -128,6 +129,7 @@ router.post("/", (request, response) => {
       const newRestaurant = {
         id: newId,
         restaurantId: restaurantObject.id,
+        comment: null
       };
 
         // Add the new restaurant to the list of starred restaurants.
@@ -143,8 +145,67 @@ router.post("/", (request, response) => {
  * Feature 9: Deleting from your list of starred restaurants.
  */
 
+router.delete('/:id', (request, response) => {
+
+  const { id } = request.params;
+
+  // Check if the restaurant is in the list
+
+  const restaurantFound = STARRED_RESTAURANTS.find(
+    (restuarant) => id === restuarant.id
+  );
+
+  // If there is no restaurant with that id found:
+  if(!restaurantFound){
+    console.log('No restaurant Found')
+    res.status(404).send('There is no restaurant with this ID');
+    return;
+  }
+
+  // if there is such a restaurant I am going to use filter() method to filter this restaurant out => Only the items that meets to condition => TRUE will be left in new array
+
+  console.log('There is such restaurant')
+  const newStarredRestaurants = STARRED_RESTAURANTS.filter(
+    (restaurant) => restaurant.id != id
+  );
+
+  // Update the STARRED_RESTAURANTS now not containing restaurant to delete
+  STARRED_RESTAURANTS = newStarredRestaurants;
+
+  response.status(200).send('Restaurant DELETED');
+
+})
+
 /**
  * Feature 10: Updating your comment of a starred restaurant.
  */
+
+router.put('/:id', (request, response) => {
+
+  const { id } = request.params;
+ const { comment } = request.body;
+
+
+  // Lets check if there is restaurant with id provided:
+  const restaurantFound = STARRED_RESTAURANTS.find(
+    (restaurant) => id === restaurant.id
+  );
+
+  // if there is not such a restaurant return status code 404 - Not Found
+  if(!restaurantFound){
+    response.sendStatus(404).send('No Restaurant with this ID in Database');
+    return;
+  }
+
+  // else there is a restaurant with that id and comment field will be updated
+  restaurantFound.comment = comment;
+
+
+
+  response.sendStatus(200);
+
+})
+
+
 
 module.exports = router;
